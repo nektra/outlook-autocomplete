@@ -109,8 +109,8 @@ static HRESULT STDMETHODCALLTYPE _IStreamRead(IStream *pThis, void *pv,ULONG cb,
 			// We got the file read.
 			// Now just wait the Stream release.
 
-			g_hookLib.Unhook(g_hookInfo[16].nHookId);
-			g_hookLib.EnableHook(g_hookInfo[17].nHookId, TRUE);
+			g_hookLib.Unhook(g_hookInfo[HOOK_ENTRY_STREAMREAD].nHookId);
+			g_hookLib.EnableHook(g_hookInfo[HOOK_ENTRY_STREAMRELEASE].nHookId, TRUE);
 		}
 		g_stBytesRead += cb;
 	}
@@ -125,10 +125,11 @@ static HRESULT WINAPI _CreateStreamOnHGlobal(
 	_In_  BOOL     fDeleteOnRelease,
 	_Out_ LPSTREAM *ppstm ) 
 {
-	HRESULT hr = PFNCREATESTREAMONHGLOBAL(g_hookInfo[1].lpCallOriginal)(hGlobal, fDeleteOnRelease, ppstm);
+	HRESULT hr = PFNCREATESTREAMONHGLOBAL(g_hookInfo[HOOK_ENTRY_CREATESTREAMONHGLOBAL].lpCallOriginal)
+		(hGlobal, fDeleteOnRelease, ppstm);
 
 	if (SUCCEEDED(hr) && hGlobal && IsNK2FileBuffer(hGlobal)) {
-		if (g_hookInfo[16].nHookId != 0 )
+		if (g_hookInfo[HOOK_ENTRY_STREAMREAD].nHookId != 0 )
 			__debugbreak(); // it's supposed to enter this ONCE.
 		//
 		// We are interested on this interface which will be used to read

@@ -17,10 +17,13 @@ void CEditCacheEntry::SetSourceRow(int i) {
 void CEditCacheEntry::UpdateControls() {
 	SPropValue sval;
 	m_nickNameCache->GetPropValue(m_rowIndex, PR_NICK_NAME_W, sval);
-	SetDlgItemText(IDC_EDIT_EMAILADDR, sval.Value.lpszW);
+	SetDlgItemText(IDC_EDIT_NICKNAME, sval.Value.lpszW);
 
 	m_nickNameCache->GetPropValue(m_rowIndex, PR_DROPDOWN_DISPLAY_NAME_W, sval);
 	SetDlgItemText(IDC_EDIT_DISPLAYAS, sval.Value.lpszW);
+
+	m_nickNameCache->GetPropValue(m_rowIndex, PR_EMAIL_ADDRESS_W, sval);
+	SetDlgItemText(IDC_EDIT_EMAILADDR, sval.Value.lpszW);
 
 	m_nickNameCache->GetPropValue(m_rowIndex, PR_NICKNAME_WEIGHT, sval);
 	wchar_t buf[10];
@@ -39,10 +42,13 @@ LRESULT CEditCacheEntry::OnClickedOK(WORD wNotifyCode, WORD wID, HWND hWndCtl, B
 
 	BSTR strDisplayAs = nullptr;
 	BSTR strAddress = nullptr;
+	BSTR strNickname = nullptr;
 	SysAllocStringLen(strDisplayAs, 1024);
 	SysAllocStringLen(strAddress,   1024);
+	SysAllocStringLen(strNickname,  1024);
 	GetDlgItemText(IDC_EDIT_DISPLAYAS, strDisplayAs);
 	GetDlgItemText(IDC_EDIT_EMAILADDR, strAddress);
+	GetDlgItemText(IDC_EDIT_NICKNAME,  strNickname);
 
 	SPropValue sval;
 	sval.dwAlignPad = 0xbaadf00d;
@@ -52,6 +58,10 @@ LRESULT CEditCacheEntry::OnClickedOK(WORD wNotifyCode, WORD wID, HWND hWndCtl, B
 
 	sval.ulPropTag		= PR_DROPDOWN_DISPLAY_NAME_W;
 	sval.Value.lpszW	= strDisplayAs;
+	m_nickNameCache->SetPropValue(m_rowIndex, sval);
+
+	sval.ulPropTag		= PR_NICK_NAME_W;
+	sval.Value.lpszW	= strNickname;
 	m_nickNameCache->SetPropValue(m_rowIndex, sval);
 
 	sval.ulPropTag		= PR_EMAIL_ADDRESS_W;
