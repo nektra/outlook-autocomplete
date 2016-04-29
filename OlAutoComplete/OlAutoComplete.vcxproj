@@ -132,6 +132,9 @@
     <ClCompile Include="NicknameCache.cpp" />
     <ClCompile Include="NicknamesView.cpp" />
     <ClCompile Include="OlAutoComplete.cpp" />
+    <ClCompile Include="OlAutoComplete_i.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="resload.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -154,6 +157,7 @@
     <ClInclude Include="NicknameCache.h" />
     <ClInclude Include="NicknamesView.h" />
     <ClInclude Include="nk2props.h" />
+    <ClInclude Include="OlAutoComplete_i.h" />
     <ClInclude Include="resload.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RowSet.h" />
