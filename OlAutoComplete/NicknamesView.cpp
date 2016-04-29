@@ -21,9 +21,10 @@ struct ListColumn {
 };
 
 static const ListColumn g_lvCols[] = {
-	L"Name", 100, 
-	L"Display", 200,
-	L"Weight", 100
+	L"Nickname", 150,
+	L"Address", 150,
+	L"Display as", 200,
+	L"Weight", 150
 };
 
 LRESULT CNicknamesView::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled) {
@@ -86,11 +87,16 @@ LRESULT CNicknamesView::OnLvnGetdispinfoNicknames(int /*idCtrl*/, LPNMHDR pNMHDR
 		pDispInfo->item.pszText = sval.Value.lpszW;	
 		break;
 	case 1:
-		m_nicknameCache->GetPropValue(pDispInfo->item.iItem, PR_DROPDOWN_DISPLAY_NAME_W, sval);		
+		m_nicknameCache->GetPropValue(pDispInfo->item.iItem, PR_EMAIL_ADDRESS_W, sval);		
 		pDispInfo->item.cchTextMax = lstrlen(sval.Value.lpszW);
 		pDispInfo->item.pszText = sval.Value.lpszW;	
 		break;
 	case 2:
+		m_nicknameCache->GetPropValue(pDispInfo->item.iItem, PR_DROPDOWN_DISPLAY_NAME_W, sval);		
+		pDispInfo->item.cchTextMax = lstrlen(sval.Value.lpszW);
+		pDispInfo->item.pszText = sval.Value.lpszW;	
+		break;
+	case 3:
 		m_nicknameCache->GetPropValue(pDispInfo->item.iItem, PR_NICKNAME_WEIGHT, sval);		
 		pDispInfo->item.cchTextMax = sizeof(numbuf);
 		wsprintf(numbuf, L"%d", sval.Value.l);
@@ -160,7 +166,6 @@ LRESULT CNicknamesView::OnBnClickedSortlist(WORD /*wNotifyCode*/, WORD /*wID*/, 
 	FillNickNameList();
 	return 0;
 }
-
 
 LRESULT CNicknamesView::OnLvnItemchangedNicknames(int idCtrl, LPNMHDR pNMHDR, BOOL& /*bHandled*/)
 {
