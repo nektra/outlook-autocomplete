@@ -18,17 +18,13 @@ using namespace ATL;
 using namespace Office;
 class NicknameCache;
 
-// CConnect
-extern _ATL_FUNC_INFO FuncInfoOnClickButton;
-
 class ATL_NO_VTABLE CConnect :
 	public CComObjectRootEx<CComSingleThreadModel>,
 	public CComCoClass<CConnect, &CLSID_Connect>,
 	public IDispatchImpl<IConnect, &IID_IConnect, &LIBID_NktOlAutoCompleteLib, /*wMajor =*/ 1, /*wMinor =*/ 0>,
 	public IDispatchImpl<_IDTExtensibility2, &__uuidof(_IDTExtensibility2), &LIBID_AddInDesignerObjects, /* wMajor = */ 1>,
 	public IDispatchImpl<IRibbonExtensibility, &__uuidof(IRibbonExtensibility), &__uuidof(__Office), /* wMajor = */ 2, /* wMinor = */ 5>,
-	public IDispatchImpl<IRibbonCallback, &__uuidof(IRibbonCallback)>,
-	public IDispEventSimpleImpl<1,CConnect,&__uuidof(Office::_CommandBarButtonEvents)> 
+	public IDispatchImpl<IRibbonCallback, &__uuidof(IRibbonCallback)>
 {
 public:
 	CConnect()
@@ -48,8 +44,7 @@ public:
 	
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
-	HRESULT FinalConstruct(){
-		
+	HRESULT FinalConstruct(){		
 		return S_OK;
 	}
 
@@ -65,7 +60,6 @@ public:
 	STDMETHOD(OnAddInsUpdate)(SAFEARRAY * * custom)		{ return S_OK;	}
 	STDMETHOD(OnStartupComplete)(SAFEARRAY * * custom)	{ return S_OK;  }
 	STDMETHOD(OnBeginShutdown)(SAFEARRAY * * custom)	{ return S_OK;  }
-
 	STDMETHOD(raw_GetCustomUI)(BSTR RibbonID, BSTR * RibbonXml);
 	STDMETHOD(ButtonClicked)(IDispatch* ribbon);
 	STDMETHOD(Invoke)(DISPID dispidMember, 
@@ -79,8 +73,6 @@ public:
 
 	static NicknameCache* m_nickNameCache;
 private:
-
-	Office::CommandBarControlPtr m_ctl;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Connect), CConnect)

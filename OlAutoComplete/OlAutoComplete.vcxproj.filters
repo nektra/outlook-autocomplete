@@ -46,6 +46,9 @@
     <ClCompile Include="OlAutoComplete.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="OlAutoComplete_i.c">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -87,6 +90,9 @@
     <ClInclude Include="resload.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="OlAutoComplete_i.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Connect.rgs">
@@ -100,9 +106,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="Ribbon.xml" />
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="OlAutoComplete.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
@@ -111,5 +114,10 @@
     <Midl Include="OlAutoComplete.idl">
       <Filter>Source Files</Filter>
     </Midl>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="Ribbon.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
   </ItemGroup>
 </Project>

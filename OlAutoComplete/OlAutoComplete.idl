@@ -1,3 +1,10 @@
+/*
+ *
+ * Copyright (C) 2016 Nektra S.A
+ *
+ * This software may be modified and distributed under the terms
+ * of the MIT license.  See the LICENSE file for details.
+ */
 import "oaidl.idl";
 import "ocidl.idl";
 
@@ -41,5 +48,3 @@ interface IRibbonCallback : IDispatch{
     [id(DISPID_RIBBONBUTTONCLICK),helpstring("Button Callback")]
     HRESULT ButtonClicked([in]IDispatch* ribbonControl);
 };
-
-

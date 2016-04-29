@@ -13,6 +13,6 @@
 #define ENTRY_PREFIX	Prx
 
 #include "dlldata.c"
-#include "OLNICKSADDIN_p.c"
+#include "OlAutoComplete_p.c"
 
 #endif //_MERGE_PROXYSTUB

@@ -32,39 +32,30 @@
 // GlobalFree(buf)
 // MEM_ADDR -> this+0x24 ---> points to SRowSet
 
-_ATL_FUNC_INFO FuncInfoOnClickButton = {CC_CDECL,VT_EMPTY,2,{VT_DISPATCH|VT_BYREF|VT_BOOL}};
+// ---------------------------------------------------------------------------
 
-// Counts where we are in the NK2 read sequence
-__declspec (thread) int g_stBytesRead;
-static void* g_pRowSet;
+__declspec (thread) int g_stBytesRead;						// Counts  NK2 read sequence bytes
+static void*			g_pRowSet;							// Pointer to in-memory rowset struct
+NicknameCache*			CConnect::m_nickNameCache = nullptr;
+static IStream*			g_pIStreamNamecache = nullptr;
+const size_t			NK2_METADATA_SIZE	= 12;
 
-NicknameCache* CConnect::m_nickNameCache = nullptr;
-
-#define STATUS_SUCCESS			0L
-#define STATUS_BUFFER_TOO_SMALL 0xC0000023
-#define NK2_METADATA_SIZE		12
-
-CNktHookLib::HOOK_INFO g_hookInfo[32] = {0};
-
+// ---------------------------------------------------------------------------
+CNktHookLib::HOOK_INFO g_hookInfo[8] = {0};
+const int HOOK_ENTRY_CREATESTREAMONHGLOBAL = 0;
+const int HOOK_ENTRY_STREAMREAD		       = 1;
+const int HOOK_ENTRY_STREAMRELEASE		   = 2;
 static CNktHookLib g_hookLib;
+// ---------------------------------------------------------------------------
 
 typedef long (NTAPI * PFNNTQUERYINFORMATIONFILE)(HANDLE,PIO_STATUS_BLOCK,PVOID,ULONG,FILE_INFORMATION_CLASS);
 typedef HRESULT (WINAPI * PFNCREATESTREAMONHGLOBAL)(HGLOBAL,BOOL,LPSTREAM*);
-typedef HRESULT (WINAPI * PFNREADFILE)(HANDLE, LPVOID, DWORD, LPDWORD, LPOVERLAPPED);
-typedef BOOL (WINAPI * PFNCLOSEHANDLE)(HANDLE);
 typedef HRESULT (__stdcall * PFNISTREAMREAD)(LPSTREAM,  void *,ULONG,ULONG *);
 
-static PFNNTQUERYINFORMATIONFILE g_pfnNtQueryInformationFile = nullptr;
-
-typedef struct _FILE_NAME_INFORMATION {
-	ULONG FileNameLength;
-	WCHAR FileName[1];
-} FILE_NAME_INFORMATION, *PFILE_NAME_INFORMATION;
-
-const int FileNameInformation = 9; // see https://msdn.microsoft.com/en-us/library/windows/hardware/ff728840(v=vs.85).aspx
-static IStream* g_pIStreamNamecache = nullptr;
-
-bool IsNK2FileBuffer(HGLOBAL hGlobal) {
+// ---------------------------------------------------------------------------
+// Returns true if HGLOBAL points to a NK2 autocomplete file on memory
+// ---------------------------------------------------------------------------
+static bool IsNK2FileBuffer(HGLOBAL hGlobal) {
 	// Check for signature
 	DWORD* pBuffer = (DWORD*) *((DWORD*)hGlobal); //dereference
 	if (!pBuffer)
@@ -76,6 +67,9 @@ bool IsNK2FileBuffer(HGLOBAL hGlobal) {
 	return (signature == 0xBAADF00D && majorVersion == 0xA && minorVersion == 1) ;
 }
 
+// ---------------------------------------------------------------------------
+// IStream::Release hook entry
+// ---------------------------------------------------------------------------
 static ULONG STDMETHODCALLTYPE _IStreamRelease(IStream* pThis) {
 	if (pThis == g_pIStreamNamecache) {
 		CConnect::m_nickNameCache = new NicknameCache(g_pRowSet);
@@ -83,6 +77,9 @@ static ULONG STDMETHODCALLTYPE _IStreamRelease(IStream* pThis) {
 	return pThis->Release();
 }
 
+// ---------------------------------------------------------------------------
+// IStream::Read hook entry
+// ---------------------------------------------------------------------------
 static HRESULT STDMETHODCALLTYPE _IStreamRead(IStream *pThis, void *pv,ULONG cb,ULONG *pcbRead) {
 	
 	static DWORD cNumRows = 0xffffffff;
@@ -120,6 +117,9 @@ static HRESULT STDMETHODCALLTYPE _IStreamRead(IStream *pThis, void *pv,ULONG cb,
 	return hr;
 }
 
+// ---------------------------------------------------------------------------
+// CreateStreamOnHGlobal hook entry
+// ---------------------------------------------------------------------------
 static HRESULT WINAPI _CreateStreamOnHGlobal(
 	_In_  HGLOBAL  hGlobal,
 	_In_  BOOL     fDeleteOnRelease,
@@ -138,14 +138,14 @@ static HRESULT WINAPI _CreateStreamOnHGlobal(
 		g_stBytesRead = 0;
 		g_pIStreamNamecache = *ppstm;
 
-		g_hookLib.Hook(&g_hookInfo[16].nHookId,
-			&g_hookInfo[16].lpCallOriginal,  
+		g_hookLib.Hook(&g_hookInfo[HOOK_ENTRY_STREAMREAD].nHookId,
+			&g_hookInfo[HOOK_ENTRY_STREAMREAD].lpCallOriginal,  
 			(void*)(lpIStreamVtbl[3]),
 			_IStreamRead, 
 			NKTHOOKLIB_DisallowReentrancy);				
 
-		g_hookLib.Hook(&g_hookInfo[17].nHookId,
-			&g_hookInfo[17].lpCallOriginal,  
+		g_hookLib.Hook(&g_hookInfo[HOOK_ENTRY_STREAMRELEASE].nHookId,
+			&g_hookInfo[HOOK_ENTRY_STREAMRELEASE].lpCallOriginal,  
 			(void*)(lpIStreamVtbl[2]),
 			_IStreamRelease, 
 			NKTHOOKLIB_DisallowReentrancy);	
@@ -153,16 +153,21 @@ static HRESULT WINAPI _CreateStreamOnHGlobal(
 	return hr;
 }
 
+// ---------------------------------------------------------------------------
 HRESULT STDMETHODCALLTYPE CConnect::OnConnection(LPDISPATCH Application, ext_ConnectMode ConnectMode, LPDISPATCH AddInInst, SAFEARRAY * * custom)
 {
 	FARPROC pCreateStreamOnHGlobal = GetProcAddress(GetModuleHandle(L"ole32.dll"), "CreateStreamOnHGlobal");
 	assert(pCreateStreamOnHGlobal);
-	g_hookLib.Hook(&g_hookInfo[1].nHookId, &g_hookInfo[1].lpCallOriginal, pCreateStreamOnHGlobal, _CreateStreamOnHGlobal, NKTHOOKLIB_DisallowReentrancy);
-	
+	g_hookLib.Hook(&g_hookInfo[HOOK_ENTRY_CREATESTREAMONHGLOBAL].nHookId, 
+		&g_hookInfo[HOOK_ENTRY_CREATESTREAMONHGLOBAL].lpCallOriginal, 
+		pCreateStreamOnHGlobal,
+		_CreateStreamOnHGlobal, 
+		NKTHOOKLIB_DisallowReentrancy);
 
 	return S_OK;
 }
 
+// ---------------------------------------------------------------------------
 HRESULT STDMETHODCALLTYPE CConnect::raw_GetCustomUI(BSTR RibbonID, BSTR* RibbonXml) {
 	if(!RibbonXml)
 		return E_POINTER;
@@ -170,10 +175,10 @@ HRESULT STDMETHODCALLTYPE CConnect::raw_GetCustomUI(BSTR RibbonID, BSTR* RibbonX
 	return S_OK;
 }
 
+// ---------------------------------------------------------------------------
 HRESULT STDMETHODCALLTYPE CConnect::ButtonClicked(IDispatch* pRibbon) {
 		if (m_nickNameCache == nullptr) {
-		MessageBox(::GetActiveWindow(), L"Nickname cache not yet generated. Enter a mail explorer window and try again.", L"Nickname cache fiddler",
-			MB_OK|MB_ICONEXCLAMATION);
+		MessageBox(::GetActiveWindow(), L"Autocomplete stream not available.", L"Error",MB_OK|MB_ICONEXCLAMATION);
 	} else {
 		CNicknamesView v(m_nickNameCache);
 		v.DoModal();
@@ -181,6 +186,7 @@ HRESULT STDMETHODCALLTYPE CConnect::ButtonClicked(IDispatch* pRibbon) {
 	return S_OK;
 }
 
+// ---------------------------------------------------------------------------
 HRESULT STDMETHODCALLTYPE CConnect::Invoke(DISPID dispidMember, 
     const IID &riid, 
     LCID lcid, 
