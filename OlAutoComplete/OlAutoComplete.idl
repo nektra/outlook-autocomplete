@@ -1,0 +1,45 @@
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(D73EB608-A239-453C-AD65-27F5F15112CA),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IConnect : IDispatch{
+};
+[
+	uuid(26370930-2ABF-4EA0-8FA2-5C3AFFC3AFB2),
+	version(1.0),
+]
+library NktOlAutoCompleteLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(3F645CBC-81F4-4E85-B986-912AB5E6B940)		
+	]
+	coclass Connect
+	{
+		interface IConnect;
+		[default] interface IRibbonCallback;
+	}
+};
+
+const int DISPID_RIBBONBUTTONCLICK = 0x4000;
+
+[
+    object,
+    uuid(CE895442-9981-4315-AA85-4B9A5C7739D8),
+    dual,
+    nonextensible,
+    helpstring("IRibbonCallback Interface"),
+    pointer_default(unique)
+]
+interface IRibbonCallback : IDispatch{
+    [id(DISPID_RIBBONBUTTONCLICK),helpstring("Button Callback")]
+    HRESULT ButtonClicked([in]IDispatch* ribbonControl);
+};
+
+

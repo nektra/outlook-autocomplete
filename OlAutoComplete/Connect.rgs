@@ -1,0 +1,51 @@
+HKCR
+{
+	OlAutoCompleteAddin.Connect.1 = s 'Connect Class'
+	{
+		CLSID = s '{3F645CBC-81F4-4E85-B986-912AB5E6B940}'
+	}
+	OlAutoCompleteAddin.Connect = s 'Connect Class'
+	{		
+		CurVer = s 'OlAutoCompleteAddin.Connect.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {3F645CBC-81F4-4E85-B986-912AB5E6B940} = s 'Connect Class'
+		{
+			ProgID = s 'OlAutoCompleteAddin.Connect.1'
+			VersionIndependentProgID = s 'OlAutoCompleteAddin.Connect'
+			ForceRemove Programmable
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			TypeLib = s '{26370930-2ABF-4EA0-8FA2-5C3AFFC3AFB2}'
+			Version = s '1.0'
+		}
+	}
+}
+
+HKCU
+{
+    NoRemove Software
+    {
+        NoRemove Microsoft
+        {
+            NoRemove Office
+            {
+                NoRemove Outlook
+                {
+                    NoRemove Addins
+                    {
+                        OlAutoCompleteAddin.Connect
+                        {
+                            val Description = s 'Nektra Outlook Autocomplete Addin'
+                            val FriendlyName = s 'Nektra Outlook Autocomplete Addin'
+                            val LoadBehavior = d 3
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

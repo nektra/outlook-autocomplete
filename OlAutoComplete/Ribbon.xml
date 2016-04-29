@@ -1,0 +1,15 @@
+<customUI xmlns="http://schemas.microsoft.com/office/2006/01/customui">
+  <ribbon>
+    <tabs>
+      <tab id="nektra" label="Nektra">
+        <group id="BingGroup" label="Nektra">
+          <button id="NewCustomButton"
+              imageMso="MailMergeRecipientsEditList"
+              size="large"
+              label="Autocomplete Stream Editor"
+              onAction="ButtonClicked"/>
+        </group>
+      </tab>
+    </tabs>
+  </ribbon>
+</customUI>
