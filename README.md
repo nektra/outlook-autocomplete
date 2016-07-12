@@ -18,20 +18,20 @@ To build and run this sample, you need:
 How Autocomplete works in Outlook
 =================================
 The list of addresses that you see when autocompletion triggers in any "address" type 
-field, such as "To:", "Cc:", "Bcc:", etc, is stored in a NK2 file under 
-`%USERPROFILE%\AppData\Roaming\Microsoft\Outlook ` where cache entries are stored.
+field, such as "To:", "Cc:", "Bcc:", etc, is stored in a Outlook.NK2 file in the folder 
+`%USERPROFILE%\AppData\Roaming\Microsoft\Outlook `.
 
 Outlook reads the file at request, e.g: when the user is going to compose a new mail
 message. After the user sends the message, Outlook will re-write the file with the 
 "Record Weight" field changed. Weights are modified, and file reordered by this field,
 according to the frequency or popularity of each address. 
 
-Many tools exist to modify the file "offline", such as NK2Edit. Our purpose is to
-change the name cache on-the-fly, seeing the changes in realtime. 
+Many tools exist to modify the file "offline", such as NK2Edit [5]. Our purpose is to
+change the name cache on-the-fly, seeing the results in realtime. 
 
 Internal structure
 ==================
-The NK2 file structure is known and documented by Microsoft itself [1]. The on memory
+The NK2 file structure is known and documented by Microsoft itself [1]. The in-memory
 version follows the same general structure: a metadata header, followed by the database
 rowset. The structures to hold the rows and rowset are publicly documented in MSDN [2][3].
 
