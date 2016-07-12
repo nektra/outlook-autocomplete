@@ -65,21 +65,21 @@ GlobalFree(buf);
 srowset_ptr = this+0x24;
 ```
 
-We found the `SRowset` pointer in a function parameter `(EBP+0xC)` of an internal call,
-once we get to read past the header.
+We find the `SRowset` pointer in a function parameter `(EBP+0xC)` of an internal call,
+once we read past the 12-byte metadata header.
 
 Our steps to get the pointer are (see Connect.cpp).
 
 1. Using Deviare-InProc we hook into `OLE32.dll!CreateStreamOnHGlobal` call.
 2. On `ole32.dll!CreateStreamOnHGlobal` call, we look for the NK2 header in the created stream;
    in that case, we subsequently hook Read and Release methods of the IStream interface.
-3. For every `IStream::Read` call we wait for reading past the initial 12-byte metadata header.
-   Once there, we store the pointer by traversing the EBP chain to look for the third pointer
-   `(EBP+0xC)` of the calling function.
-4. When the `IStream::Release` is called for the NK2 stream, we create the `CNicknameCache` class
-   passing the `SRowSet` structure pointer we obtained in the process. This class acts as a simple
-   wrapper for the database: you can obtain row count, sort by tag, get/set properties, swap
-   rows and retrieve a particular row (`SRow` structure pointer).
+3. For every `IStream::Read` call, we wait for reading past the initial 12-byte metadata header.
+   Once there, we store the pointer by traversing the EBP chain to look for the second argument
+   `(EBP+0xC)` of the calling function (according to standard-call convention).
+4. When the `IStream::Release` is called for the NK2 stream, we construct the `CNicknameCache` class
+   instance passing the `SRowSet` structure pointer we obtained in the process. Our object acts as a simple
+   wrapper for the database exposing a serie of methods such as obtain the row count, sort by tag, 
+   get/set properties, swap rows and retrieve a particular row (`SRow` structure pointer).
 5. At this point we're ready to fiddle with the rowset structure without problem.  Outlook will  
    write it to disk when at application exit.
    
@@ -87,13 +87,17 @@ How to run the sample
 =====================
 1. Make sure Outlook is properly installed.
 2. Open and build the solution.
-3. Open Outlook. When you open the compose mail window, a Nektra ribbon tab with the UI button
+3. Register the output DLL with Outlook using `REGSVR32` at an elevated command prompt.
+4. Open Outlook. When you open the compose mail window, a Nektra ribbon tab with the UI button
    should be available. 
-4. Click the button to open the editor and modify the list entries as you wish.
-5. Play with the autocomplete dropdown on the CC/BCC input fields to see the effect of your 
+5. Click the button to open the editor and modify the list entries as you wish.
+6. Play with the autocomplete dropdown on the CC/BCC input fields to see the effect of your 
    modification on the input data and the field ordering.
 
 After Outlook saves your modifications, you can use an external NK2 viewer to see your modified entries. [5]
+
+To uninstall the sample from Outlook, unregister it with `REGSVR32 /U <dllname>` at an elevated command prompt.
+
 
 References
 ==========
